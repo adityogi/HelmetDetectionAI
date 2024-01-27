@@ -258,6 +258,7 @@ class RekognitionLabel:
         rendering = {}
         if self.name is not None:
             rendering["name"] = self.name
+            # Team 53: Added a confidence value to the returning dict()
             rendering["confidence"] = self.confidence
         if self.timestamp is not None:
             rendering["timestamp"] = self.timestamp
