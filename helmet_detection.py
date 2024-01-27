@@ -33,7 +33,7 @@ from rekognition_objects import (
 logger = logging.getLogger(__name__)
 
 # snippet-end:[python.example_code.rekognition.image_detection_imports]
-labels = street_scene_image.detect_labels(100)
+# labels = street_scene_image.detect_labels(100)
 
 # snippet-start:[python.example_code.rekognition.RekognitionImage]
 class RekognitionImage:
@@ -362,7 +362,41 @@ def usage_demo():
     print("-" * 88)
 
 
+def display_vehicle_in_a_box(labels, img_scene):
+    names = []
+    box_sets = []
+    colors = ["aqua", "red", "white", "blue", "yellow", "green"]
+    for label in labels:
+        if label.instances:
+            # print("Has instance:", label.name)
+            if label.name not in ("Vehicle", "Moped", "Motor Scooter", "Motorcycle"):
+                continue
+            names.append(label.name)
+            box_sets.append([inst["BoundingBox"] for inst in label.instances])
+    if len(names):
+        print(f"Showing bounding boxes for {names} in {colors[:len(names)]}.")
+        show_bounding_boxes(
+            img_scene.image["Bytes"], box_sets, colors[: len(names)]
+        )
+
 # snippet-end:[python.example_code.rekognition.Usage_ImageDetection]
+
+def display_helmet_in_a_box(labels, img_scene):
+    names = []
+    box_sets = []
+    colors = ["aqua", "red", "white", "blue", "yellow", "green"]
+    for label in labels:
+        if label.instances:
+            # print("Has instance:", label.name)
+            # if label.name not in ("helmet", "Helmet", "Crash Helmet", "Motorcycle"):
+            #     continue
+            names.append(label.name)
+            box_sets.append([inst["BoundingBox"] for inst in label.instances])
+    if len(names):
+        print(f"Showing bounding boxes for {names} in {colors[:len(names)]}.")
+        show_bounding_boxes(
+            img_scene.image["Bytes"], box_sets, colors[: len(names)]
+        )
 
 
 def check_if_helmet(img_file_name):
@@ -379,9 +413,11 @@ def check_if_helmet(img_file_name):
 
     # print(f"Detecting labels in {street_scene_image.image_name}...")
     labels = street_scene_image.detect_labels(100)
+    
     # print(f"Found {len(labels)} labels.")
     is_2_wheeler = False
     is_helmet = False
+    
     for label in labels:
         detected_obj = label.to_dict()
         pprint(detected_obj)
@@ -391,11 +427,11 @@ def check_if_helmet(img_file_name):
             is_helmet = True
 
     if is_2_wheeler and is_helmet:
-        return True
+        return (True, street_scene_image, labels) 
     elif not is_2_wheeler:
-        return True
+        return (True, street_scene_image, labels)
 
-    return False
+    return (False, street_scene_image, labels)
 
 if __name__ == "__main__":
     # usage_demo()
@@ -404,14 +440,11 @@ if __name__ == "__main__":
     ]
 
     for img_file_name in img_files:
-        if check_if_helmet(img_file_name):
+        (helmet_detected, img_scene, labels) = check_if_helmet(img_file_name)
+        if helmet_detected:
             print("Helmet detected in", img_file_name)
-            show_bounding_boxes(
-                img_file_name.image["Bytes"],
-                [[img_file_name.bounding_box for label in label]],
-                ["aqua"],
-            )
+            display_helmet_in_a_box(labels, img_scene)
         else:
             print("Helmet is not detected in", img_file_name)
-
+            display_vehicle_in_a_box(labels, img_scene)
         print("")
