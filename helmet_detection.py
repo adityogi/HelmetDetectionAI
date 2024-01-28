@@ -15,6 +15,7 @@ without cloning the GitHub repository, you must first download the image files f
 
 # snippet-start:[python.example_code.rekognition.image_detection_imports]
 import logging
+import os
 from pprint import pprint
 import boto3
 from botocore.exceptions import ClientError
@@ -181,7 +182,10 @@ def check_if_helmet(img_file_name):
     # print("-" * 88)
 
     # logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    rekognition_client = boto3.client("rekognition")
+    rekognition_client = boto3.client("rekognition",
+                    aws_access_key_id = os.environ.get("AWS_ACCESS_KEY"),
+                    aws_secret_access_key = os.environ.get("AWS_SECRET_KEY"),
+                    region_name = os.environ.get("AWS_DEFAULT_REGION"))
 
     street_scene_image = RekognitionImage.from_file(
         img_file_name, rekognition_client
